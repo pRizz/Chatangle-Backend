@@ -1,0 +1,5 @@
+Beanstalk ELB/Sec Group notes for Chatangle
+
+Must update sec group on both instance and elb
+I should move stuff to port 80 to mitigate that stuff
+Disable nginx

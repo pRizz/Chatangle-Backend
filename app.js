@@ -1,46 +1,59 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+/*!
+ * Chatangle Backend
+ * Copyright(c) 2017 Peter Ryszkiewicz
+ * MIT Licensed
+ */
 
-var index = require('./routes/index');
-var users = require('./routes/users');
+const argv = require('minimist')(process.argv.slice(2), {
+    'alias': {
+        'h': 'help',
+        'i': 'iotaTransactionStreamIP', // see https://github.com/pRizz/IOTA-Transaction-Stream
+        'p': 'iotaTransactionStreamPort', // see https://github.com/pRizz/IOTA-Transaction-Stream
+        's': 'isIotaTransactionStreamSecured', // if true, then connect to the IOTA Transaction Stream with the wss protocol, else, use ws
+        'w': 'webSocketServerPort'
+    },
+    'default': {
+        'iotaTransactionStreamPort': 8008,
+        'isIotaTransactionStreamSecured': false,
+        'webSocketServerPort': 8008
+    }
+})
 
-var app = express();
+function printHelp() {
+    console.log(`chatangle-backend
+  The backend service for a free, decentralized, global chatroom, powered by the IOTA tangle. Depends on a working IOTA Transaction Stream.
+  Usage: chatangle-backend --iotaTransactionStreamIP=ip [--iotaTransactionStreamPort=port] [--isIotaTransactionStreamSecured=[true|false]] [--webSocketServerPort=port] [--help]
+    options:
+      -i, --iotaTransactionStreamIP ip : the IP address of the IOTA Transaction Stream
+      -p, --iotaTransactionStreamPort port: the port of the IOTA Transaction Stream; defaults to 8008
+      -s, --isIotaTransactionStreamSecured [true|false]: if true, then connect to the IOTA Transaction Stream with the wss protocol, else, use ws; defaults to false
+      -w, --webSocketServerPort port: the port of the WebSocket server which facilitates the Chatangle frontend; defaults to 8008
+      -h, --help : print this help info
+  
+  Example usage: chatangle-backend --iotaTransactionStreamIP 123.45.67.890 --iotaTransactionStreamPort 8008 --isIotaTransactionStreamSecured false --webSocketServerPort 8008
+  Example if running from an IDE: npm run start -- --iotaTransactionStreamIP 123.45.67.890 --iotaTransactionStreamPort 8008 --isIotaTransactionStreamSecured false --webSocketServerPort 8008
+    `)
+    process.exit(0)
+}
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+if(argv.help) {
+    printHelp()
+}
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+if(!argv.iotaTransactionStreamIP) {
+    console.error(`You must supply an IP address to --iotaTransactionStreamIP`)
+    printHelp()
+}
 
-app.use('/', index);
-app.use('/users', users);
+const transactionStreamSubscriberFilter = require('./lib/TransactionStreamSubscriberFilter')(argv.iotaTransactionStreamIP, argv.iotaTransactionStreamPort, argv.isIotaTransactionStreamSecured)
+const chatangleWebSocketServer = require('./routes/chatangleWebSocketServer')(argv.webSocketServerPort)
+const recentMessageCache = require('./lib/RecentMessageCache')
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
+chatangleWebSocketServer.setMessageCache(recentMessageCache)
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+transactionStreamSubscriberFilter.setTransactionCallback(transaction => {
+    recentMessageCache.addMessage(transaction)
+    chatangleWebSocketServer.broadcastObjectToClients(transaction, 'newMessage')
+})
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-module.exports = app;
+module.exports = {}

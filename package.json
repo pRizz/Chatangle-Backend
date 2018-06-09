@@ -1,17 +1,31 @@
 {
-  "name": "iota-chatter",
-  "version": "0.0.0",
-  "private": true,
+  "name": "chatangle-backend",
+  "version": "1.0.0",
+  "description": "The backend for Chatangle; a free, decentralized, global chatroom, powered by the IOTA tangle.",
   "scripts": {
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "body-parser": "~1.18.2",
-    "cookie-parser": "~1.4.3",
-    "debug": "~2.6.9",
-    "express": "~4.15.5",
-    "jade": "~1.11.0",
-    "morgan": "~1.9.0",
-    "serve-favicon": "~2.4.5"
-  }
+    "iota.lib.js": "^0.4.7",
+    "lodash": "^4.17.10",
+    "minimist": "^1.2.0",
+    "tryte-utf8-json-codec": "^1.0.0",
+    "ws": "^5.1.1"
+  },
+  "bin": {
+    "chatangle-backend": "bin/www"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pRizz/Chatangle-Backend.git"
+  },
+  "keywords": [
+    "iota"
+  ],
+  "author": "Peter Ryszkiewicz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pRizz/Chatangle-Backend/issues"
+  },
+  "homepage": "https://github.com/pRizz/Chatangle-Backend#readme"
 }
