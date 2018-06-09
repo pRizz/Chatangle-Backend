@@ -23,6 +23,7 @@ function printHelp() {
     console.log(`chatangle-backend
   The backend service for a free, decentralized, global chatroom, powered by the IOTA tangle. Depends on a working IOTA Transaction Stream.
   Usage: chatangle-backend --iotaTransactionStreamIP=ip [--iotaTransactionStreamPort=port] [--isIotaTransactionStreamSecured=[true|false]] [--webSocketServerPort=port] [--help]
+  If 'PORT' is specified in the environment, this will override 'webSocketServerPort'
     options:
       -i, --iotaTransactionStreamIP ip : the IP address of the IOTA Transaction Stream
       -p, --iotaTransactionStreamPort port: the port of the IOTA Transaction Stream; defaults to 8008
@@ -46,7 +47,7 @@ if(!argv.iotaTransactionStreamIP) {
 }
 
 const transactionStreamSubscriberFilter = require('./lib/TransactionStreamSubscriberFilter')(argv.iotaTransactionStreamIP, argv.iotaTransactionStreamPort, argv.isIotaTransactionStreamSecured)
-const chatangleWebSocketServer = require('./routes/chatangleWebSocketServer')(argv.webSocketServerPort)
+const chatangleWebSocketServer = require('./routes/chatangleWebSocketServer')(process.env.PORT || argv.webSocketServerPort)
 const recentMessageCache = require('./lib/RecentMessageCache')
 
 chatangleWebSocketServer.setMessageCache(recentMessageCache)

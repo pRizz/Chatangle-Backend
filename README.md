@@ -46,6 +46,8 @@ Then tail the logs with
 tail -f output.log
 ```
 
+If `PORT` is specified in the environment, this will override `webSocketServerPort`
+
 ### Hooking Into The Backend
 
 These lines of Javascript can be copy-pasted into the Chrome console after starting the server locally to test if the backend is working:
