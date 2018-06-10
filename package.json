@@ -1,6 +1,6 @@
 {
   "name": "chatangle-backend",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The backend for Chatangle; a free, decentralized, global chatroom, powered by the IOTA tangle.",
   "scripts": {
     "start": "node ./bin/www"
