@@ -46,7 +46,7 @@ if(!argv.iotaTransactionStreamIP) {
     printHelp()
 }
 
-require('../app')({
+require('../app').start({
     iotaTransactionStreamIP: argv.iotaTransactionStreamIP,
     iotaTransactionStreamPort: argv.iotaTransactionStreamPort,
     isIotaTransactionStreamSecured: argv.isIotaTransactionStreamSecured,

@@ -53,6 +53,11 @@ function setMessageCache(newMessageCache) {
 let heartbeatInterval
 
 function initializeServer(webSocketServerPort) {
+    if(webSocketServer) {
+        console.log('Already running!')
+        return
+    }
+
     webSocketServer = new WebSocket.Server({
         port: webSocketServerPort
     })
@@ -96,11 +101,29 @@ function initializeServer(webSocketServerPort) {
     }, 30010)
 }
 
-module.exports = function(webSocketServerPort) {
+function start({ webSocketServerPort }) {
     initializeServer(webSocketServerPort)
 
     return {
         broadcastObjectToClients,
-        setMessageCache
+        setMessageCache,
+        stop
     }
+}
+
+async function stop() {
+    return new Promise((resolve, reject) => {
+        if(!webSocketServer) {
+            return reject('No server to stop')
+        }
+        webSocketServer.close((error) => {
+            if(error) { return reject(error) }
+            resolve()
+        })
+        webSocketServer = null
+    })
+}
+
+module.exports = {
+    start
 }

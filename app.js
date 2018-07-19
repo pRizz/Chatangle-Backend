@@ -8,9 +8,15 @@ const TransactionStreamSubscriberFilter = require('./lib/TransactionStreamSubscr
 const ChatangleWebSocketServer = require('./routes/chatangleWebSocketServer')
 const RecentMessageCache = require('./lib/RecentMessageCache')
 
-module.exports = function({ iotaTransactionStreamIP, iotaTransactionStreamPort, isIotaTransactionStreamSecured, webSocketServerPort }) {
+let chatangleWebSocketServer = null
+
+function start({ iotaTransactionStreamIP, iotaTransactionStreamPort, isIotaTransactionStreamSecured, webSocketServerPort }) {
+    if(chatangleWebSocketServer) {
+        console.log('Already started chatangleWebSocketServer')
+        return
+    }
     const transactionStreamSubscriberFilter = TransactionStreamSubscriberFilter(iotaTransactionStreamIP, iotaTransactionStreamPort, isIotaTransactionStreamSecured)
-    const chatangleWebSocketServer = ChatangleWebSocketServer(process.env.PORT || webSocketServerPort)
+    chatangleWebSocketServer = ChatangleWebSocketServer.start({ webSocketServerPort: process.env.PORT || webSocketServerPort })
 
     chatangleWebSocketServer.setMessageCache(RecentMessageCache)
 
@@ -18,4 +24,20 @@ module.exports = function({ iotaTransactionStreamIP, iotaTransactionStreamPort, 
         RecentMessageCache.addMessage(transaction)
         chatangleWebSocketServer.broadcastObjectToClients(transaction, 'newMessage')
     })
+}
+
+async function stop() {
+    if(!chatangleWebSocketServer) {
+        console.error('No chatangleWebSocketServer to stop')
+        return
+    }
+
+    const localChatangleWebSocketServer = chatangleWebSocketServer
+    chatangleWebSocketServer = null
+    await localChatangleWebSocketServer.stop()
+}
+
+module.exports = {
+    start,
+    stop
 }
