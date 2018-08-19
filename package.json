@@ -6,11 +6,11 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "iota.lib.js": "^0.4.7",
+    "iota.lib.js": "^0.5.0",
     "lodash": "^4.17.10",
     "minimist": "^1.2.0",
     "tryte-utf8-json-codec": "^1.0.0",
-    "ws": "^5.1.1"
+    "ws": "^6.0.0"
   },
   "bin": {
     "chatangle-backend": "bin/www"
